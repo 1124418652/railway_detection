@@ -53,13 +53,9 @@ bool loadPyModule(PyObject **module, PyObject **pDict, PyObject **pFunc)
 int callPythonFunc(const cv::Mat &img, PyObject *pFunc)
 {
 	if (!img.data)
-	{
 		return -1;
-	}
 	if (!pFunc)
-	{
 		return -1;
-	}
 	cv::Mat tmp = img.clone();
 	int rows = img.rows;
 	int cols = img.cols;
@@ -103,4 +99,72 @@ int callPythonFunc(const cv::Mat &img, PyObject *pFunc)
 		Py_DECREF(pReturn);
 
 	return res;
+}
+
+int callPythonFunc(const std::vector<cv::Mat> &obsTmpList, PyObject *pFunc,
+	std::vector<int> &predictRes)
+{
+	if (obsTmpList.empty())
+		return -1;
+	if (!pFunc)
+		return -1;
+	if (!predictRes.empty())
+		predictRes.clear();
+	int numImg = (int)obsTmpList.size();
+	int rows = obsTmpList[0].rows;
+	int cols = obsTmpList[0].cols;
+	int channels = obsTmpList[0].channels();
+	int imgSize = rows * cols * channels;
+	int res = -1;
+	PyObject *pArgs = PyTuple_New(4);
+	PyObject *pList = PyList_New(numImg * imgSize);
+	PyObject *pReturn = NULL;
+
+	for (int i = 0; i < numImg; ++i)
+	{
+		cv::Mat tmp = obsTmpList[i].clone();
+		for (int row = 0; row < rows; ++row)
+		{
+			cv::Vec3b *p = tmp.ptr<cv::Vec3b>(row);
+			for (int col = 0; col < cols; ++col)
+			{
+				PyList_SetItem(pList, i * imgSize + row * cols * 3 + col * 3 + 0, 
+					Py_BuildValue("i", p[col][0]));
+				PyList_SetItem(pList, i * imgSize + row * cols * 3 + col * 3 + 1, 
+					Py_BuildValue("i", p[col][1]));
+				PyList_SetItem(pList, i * imgSize + row * cols * 3 + col * 3 + 2, 
+					Py_BuildValue("i", p[col][2]));
+			}
+		}
+	}
+
+	PyTuple_SetItem(pArgs, 0, pList);
+	PyTuple_SetItem(pArgs, 1, Py_BuildValue("i", cols));
+	PyTuple_SetItem(pArgs, 2, Py_BuildValue("i", rows));
+	PyTuple_SetItem(pArgs, 3, Py_BuildValue("i", channels));
+
+	PyGILState_STATE gstate;
+	gstate = PyGILState_Ensure();
+	pReturn = PyObject_CallObject(pFunc, pArgs);
+	PyGILState_Release(gstate);
+	if (!pReturn)
+	{
+		return -1;
+	}
+	PyObject *pListItem = NULL;
+	int listNum = PyList_Size(pReturn);
+	for (int j = 0; j < listNum; ++j)
+	{
+		int tmp;
+		pListItem = PyList_GetItem(pReturn, j);
+		PyArg_Parse(pListItem, "i", &tmp);
+		predictRes.push_back(tmp);
+	}
+	if (pListItem) { Py_DECREF(pListItem); };
+	if (pList)
+		Py_DECREF(pList);
+	if (pArgs)
+		Py_DECREF(pArgs);
+	if (pReturn)
+		Py_DECREF(pReturn);
 }

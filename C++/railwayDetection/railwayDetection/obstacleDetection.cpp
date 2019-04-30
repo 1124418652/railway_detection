@@ -210,16 +210,12 @@ int ObstacleDetector::obstacleDetection(const cv::Mat &img,
 					}
 					else {
 						while (head < tail)
-						{
 							head++;
-						}
 					}
 					obstacleList.push_back(tmpObsDeque[head]);
 				}
 				else
-				{
 					tail++;
-				}
 			}
 		}
 		else
@@ -310,16 +306,12 @@ int ObstacleDetector::obstacleDetection(const cv::Mat &img,
 					}
 					else {
 						while (head < tail)
-						{
 							head++;
-						}
 					}
 					obstacleList.push_back(tmpObsDeque[head]);
 				}
 				else
-				{
 					tail++;
-				}
 			}
 		}
 		else
@@ -409,16 +401,12 @@ int ObstacleDetector::obstacleDetection(const cv::Mat &img,
 					}
 					else {
 						while (head < tail)
-						{
 							head++;
-						}
 					}
 					obstacleList.push_back(tmpObsDeque[head]);
 				}
 				else
-				{
 					tail++;
-				}
 			}
 		}
 		else
@@ -465,7 +453,7 @@ int ObstacleDetector::obstacleDetection(const cv::Mat &img,
 						//std::cout << "have obstacle" << std::endl;
 						std::vector<cv::Point2f> points = { cv::Point2f(xWraped, yWraped) }, pointTrans;
 						cv::perspectiveTransform(points, pointTrans, Minv);
-						obstacleList.push_back(ObstacleInfo(cv::Point(pointTrans[0].x,
+						tmpObsDeque.push_back(ObstacleInfo(cv::Point(pointTrans[0].x,
 							pointTrans[0].y), 50, 50));
 						i += 150;
 					}
@@ -506,16 +494,12 @@ int ObstacleDetector::obstacleDetection(const cv::Mat &img,
 					}
 					else {
 						while (head < tail)
-						{
 							head++;
-						}
 					}
 					obstacleList.push_back(tmpObsDeque[head]);
 				}
 				else
-				{
 					tail++;
-				}
 			}
 		}
 		else
