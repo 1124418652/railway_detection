@@ -1,0 +1,15 @@
+修改目的：在obstacleDetection函数中检测到障碍物的候选框之后，加入一个tensorflow模型来判
+	断该方框内是否为障碍物（通过内嵌一个调用模型的Python脚本来实现），从而减小误
+	判率。
+修改内容：
+1、类成员中加入：PyObject *pFunc；   // python中的函数对象
+                           PyObject *pArgs;      // python中的函数的参数
+	           PyObject *module;   // python模块对象
+2、在类的构造函数中，加入导入Python模块pArgs，module的步骤（已经封装在头文件
+     loadTensorflowModel.h中，通过调用该文件中的loadPyModule函数实现），如果
+     导入Python模块失败，则类的初始化也失败。
+3、为了尽量减小漏检率，在obstacleDetection函数内调小判定为障碍物候选框的阈值，尽量产生
+     多的候选框。
+4、在obstacleDetection函数中，在检测出候选框之后，调用Python脚本中的predict函数预测该框
+     内是否为真实的障碍物，如果是，记录坐标，如果否，丢弃。
+5、在类的析构函数中调用Py_Finalize()释放python的内存。
