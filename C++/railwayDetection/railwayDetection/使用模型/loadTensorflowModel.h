@@ -60,6 +60,16 @@ bool loadPyModule(PyObject **module, PyObject **pDict, PyObject **pFunc);
  *params pFunc PyObject类的对象指针,指向需要调用的函数指针
  */
 int callPythonFunc(const cv::Mat &img, PyObject *pFunc);
+
+/*
+ *brief 将每帧画面的每个ROI区域检测出的候选障碍物框分别输入模型进行预测，
+		预测结果保存在vector中
+ *params obsTmpList 保存候选障碍物框的vector
+ *params pFunc Python中的函数对象
+ *params predictRes 用于返回预测结果
+ */
+int callPythonFunc(const std::vector<cv::Mat> &obsTmpList, PyObject *pFunc,
+	std::vector<int> &predictRes);
 #endif // !__LOAD_TENSORFLOW_MODEL 
 
 

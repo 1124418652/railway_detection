@@ -82,6 +82,14 @@ public:
 		int maxThresh = 10, int minThresh = 1.0, int minGap = 25, int binaryThresh = 100,
 		int type = OBSTACLE_DETECTE_BY_GRAD);
 
+	/*
+	@brief 执行障碍物检测的函数，在前一个函数的基础上加上了tensorflow下训练的模型对障碍物候选框
+		   进行进一步的筛选，参数与上一个函数相同
+	*/
+	int obstacleDetectionWithModel(const cv::Mat &img, const std::vector<LinePoints> &lines,
+		std::vector<ObstacleInfo> &obstacleList, int maxThresh = 10, int minThresh = 1.0,
+		int minGap = 25, int binaryThresh = 100);
+
 private:
 	cv::Mat img;                    // 输入进行检测的原图片，由函数调用者提供
 	std::vector<LinePoints> lines;  // 在原图片中已经得到的铁轨直线，由函数调用者提供

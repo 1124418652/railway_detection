@@ -72,7 +72,7 @@ int main()
 	*/
 
 	
-	videoDetection(5, FROM_FILE, "img/πÏµ¿”–“ÏŒÔ1extract.avi");
+	videoDetection(5, FROM_FILE, "img/3extract1.avi");
 	
 	/*
 	PyObject *module = NULL;

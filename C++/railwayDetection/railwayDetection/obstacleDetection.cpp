@@ -541,7 +541,9 @@ int ObstacleDetector::obstacleDetectionWithModel(const cv::Mat &img,
 		/* 进行障碍物搜索和定位的算法 */
 		std::deque<ObstacleInfo> tmpObsDeque;
 		std::vector<cv::Mat> obsTmpList;
-		for (int i = 0; i < gradyImg1.rows - 50; ++i)
+		std::vector<int> predictRes;
+		std::vector<cv::Vec2i> xyWraped;
+		for (int i = 50; i < gradyImg1.rows - 50; ++i)
 		{
 			if (yHist1[i] != 0)
 			{
@@ -554,21 +556,33 @@ int ObstacleDetector::obstacleDetectionWithModel(const cv::Mat &img,
 					numObstacles += 1;       // 障碍物的数目加1
 					int xWraped = warpedLine1x1 - leftROIWidth / 2;
 					int yWraped = i;
-					
+					xyWraped.push_back(cv::Vec2i(xWraped, yWraped));
 					// 获取障碍物的候选区
 					cv::Mat tmpImg = warpedImg(cv::Range(i - 50, i + 50),
 						cv::Range(xWraped - 50, xWraped + 50));
 					obsTmpList.push_back(tmpImg);
+					i += 50;
+				}
+			}
+		}
 
-					if (1 == callPythonFunc(tmpImg, this->pFunc))
-					{
-						//std::cout << "have obstacle" << std::endl;
-						std::vector<cv::Point2f> points = { cv::Point2f(xWraped, yWraped) }, pointTrans;
-						cv::perspectiveTransform(points, pointTrans, Minv);
-						tmpObsDeque.push_back(ObstacleInfo(cv::Point(pointTrans[0].x,
-							pointTrans[0].y), 50, 50));
-						i += 150;
-					}
+		if (-1 == callPythonFunc(obsTmpList, this->pFunc, predictRes))
+		{
+			return 0;
+		}
+		else
+		{
+			int xWraped, yWraped;
+			for (size_t i = 0; i < predictRes.size(); ++i)
+			{
+				if (predictRes[i] == 1)
+				{
+					xWraped = xyWraped[i][0];
+					yWraped = xyWraped[i][1];
+					std::vector<cv::Point2f> points = { cv::Point2f(xWraped, yWraped) }, pointTrans;
+					cv::perspectiveTransform(points, pointTrans, Minv);
+					tmpObsDeque.push_back(ObstacleInfo(cv::Point(pointTrans[0].x,
+						pointTrans[0].y), 50, 50));
 				}
 			}
 		}
@@ -617,7 +631,10 @@ int ObstacleDetector::obstacleDetectionWithModel(const cv::Mat &img,
 
 		/* 进行障碍物搜索和定位的算法 */
 		std::deque<ObstacleInfo> tmpObsDeque;
-		for (int i = 0; i < gradyImg2.rows - 50; ++i)
+		std::vector<cv::Mat> obsTmpList;
+		std::vector<int> predictRes;
+		std::vector<cv::Vec2i> xyWraped;
+		for (int i = 50; i < gradyImg2.rows - 50; ++i)
 		{
 			if (yHist2[i] != 0)
 			{
@@ -630,23 +647,37 @@ int ObstacleDetector::obstacleDetectionWithModel(const cv::Mat &img,
 					numObstacles += 1;       // 障碍物的数目加1
 					int xWraped = warpedLine1x1 + leftROIWidth / 2;
 					int yWraped = i;
-
-
+					xyWraped.push_back(cv::Vec2i(xWraped, yWraped));
+					// 获取障碍物的候选区
 					cv::Mat tmpImg = warpedImg(cv::Range(i - 50, i + 50),
 						cv::Range(xWraped - 50, xWraped + 50));
-
-					if (1 == callPythonFunc(tmpImg, this->pFunc))
-					{
-						//std::cout << "have obstacle" << std::endl;
-						std::vector<cv::Point2f> points = { cv::Point2f(xWraped, yWraped) }, pointTrans;
-						cv::perspectiveTransform(points, pointTrans, Minv);
-						tmpObsDeque.push_back(ObstacleInfo(cv::Point(pointTrans[0].x,
-							pointTrans[0].y), 50, 50));
-						i += 50;
-					}
+					obsTmpList.push_back(tmpImg);
+					i += 50;
 				}
 			}
 		}
+
+		if (-1 == callPythonFunc(obsTmpList, this->pFunc, predictRes))
+		{
+			return 0;
+		}
+		else
+		{
+			int xWraped, yWraped;
+			for (size_t i = 0; i < predictRes.size(); ++i)
+			{
+				if (predictRes[i] == 1)
+				{
+					xWraped = xyWraped[i][0];
+					yWraped = xyWraped[i][1];
+					std::vector<cv::Point2f> points = { cv::Point2f(xWraped, yWraped) }, pointTrans;
+					cv::perspectiveTransform(points, pointTrans, Minv);
+					tmpObsDeque.push_back(ObstacleInfo(cv::Point(pointTrans[0].x,
+						pointTrans[0].y), 50, 50));
+				}
+			}
+		}
+
 		int head = 0, tail = 0;
 		if (tmpObsDeque.size() > 5)
 		{
@@ -691,7 +722,10 @@ int ObstacleDetector::obstacleDetectionWithModel(const cv::Mat &img,
 
 		/* 进行障碍物搜索和定位的算法 */
 		std::deque<ObstacleInfo> tmpObsDeque;
-		for (int i = 0; i < gradyImg3.rows - 50; ++i)
+		std::vector<cv::Mat> obsTmpList;
+		std::vector<int> predictRes;
+		std::vector<cv::Vec2i> xyWraped;
+		for (int i = 50; i < gradyImg3.rows - 50; ++i)
 		{
 			if (yHist3[i] != 0)
 			{
@@ -703,22 +737,37 @@ int ObstacleDetector::obstacleDetectionWithModel(const cv::Mat &img,
 				{
 					int xWraped = warpedLine2x1 - rightROIWidth / 2;
 					int yWraped = i;
-
+					xyWraped.push_back(cv::Vec2i(xWraped, yWraped));
+					// 获取障碍物的候选区
 					cv::Mat tmpImg = warpedImg(cv::Range(i - 50, i + 50),
 						cv::Range(xWraped - 50, xWraped + 50));
-
-					if (1 == callPythonFunc(tmpImg, this->pFunc))
-					{
-						//std::cout << "have obstacle" << std::endl;
-						std::vector<cv::Point2f> points = { cv::Point2f(xWraped, yWraped) }, pointTrans;
-						cv::perspectiveTransform(points, pointTrans, Minv);
-						tmpObsDeque.push_back(ObstacleInfo(cv::Point(pointTrans[0].x,
-							pointTrans[0].y), 50, 50));
-						i += 150;
-					}
+					obsTmpList.push_back(tmpImg);
+					i += 50;
 				}
 			}
 		}
+
+		if (-1 == callPythonFunc(obsTmpList, this->pFunc, predictRes))
+		{
+			return 0;
+		}
+		else
+		{
+			int xWraped, yWraped;
+			for (size_t i = 0; i < predictRes.size(); ++i)
+			{
+				if (predictRes[i] == 1)
+				{
+					xWraped = xyWraped[i][0];
+					yWraped = xyWraped[i][1];
+					std::vector<cv::Point2f> points = { cv::Point2f(xWraped, yWraped) }, pointTrans;
+					cv::perspectiveTransform(points, pointTrans, Minv);
+					tmpObsDeque.push_back(ObstacleInfo(cv::Point(pointTrans[0].x,
+						pointTrans[0].y), 50, 50));
+				}
+			}
+		}
+
 		int head = 0, tail = 0;
 		if (tmpObsDeque.size() > 5)
 		{
@@ -763,7 +812,10 @@ int ObstacleDetector::obstacleDetectionWithModel(const cv::Mat &img,
 
 		/* 进行障碍物识别的代码 */
 		std::deque<ObstacleInfo> tmpObsDeque;
-		for (int i = 0; i < gradyImg4.rows - 50; ++i)
+		std::vector<cv::Mat> obsTmpList;
+		std::vector<int> predictRes;
+		std::vector<cv::Vec2i> xyWraped;
+		for (int i = 50; i < gradyImg4.rows - 50; ++i)
 		{
 			if (yHist4[i] != 0)
 			{
@@ -775,22 +827,37 @@ int ObstacleDetector::obstacleDetectionWithModel(const cv::Mat &img,
 				{
 					int xWraped = warpedLine2x1 + rightROIWidth / 2;
 					int yWraped = i;
-
+					xyWraped.push_back(cv::Vec2i(xWraped, yWraped));
+					// 获取障碍物的候选区
 					cv::Mat tmpImg = warpedImg(cv::Range(i - 50, i + 50),
 						cv::Range(xWraped - 50, xWraped + 50));
-
-					if (1 == callPythonFunc(tmpImg, this->pFunc))
-					{
-						//std::cout << "have obstacle" << std::endl;
-						std::vector<cv::Point2f> points = { cv::Point2f(xWraped, yWraped) }, pointTrans;
-						cv::perspectiveTransform(points, pointTrans, Minv);
-						tmpObsDeque.push_back(ObstacleInfo(cv::Point(pointTrans[0].x,
-							pointTrans[0].y), 50, 50));
-						i += 150;
-					}
+					obsTmpList.push_back(tmpImg);
+					i += 50;
 				}
 			}
 		}
+
+		if (-1 == callPythonFunc(obsTmpList, this->pFunc, predictRes))
+		{
+			return 0;
+		}
+		else
+		{
+			int xWraped, yWraped;
+			for (size_t i = 0; i < predictRes.size(); ++i)
+			{
+				if (predictRes[i] == 1)
+				{
+					xWraped = xyWraped[i][0];
+					yWraped = xyWraped[i][1];
+					std::vector<cv::Point2f> points = { cv::Point2f(xWraped, yWraped) }, pointTrans;
+					cv::perspectiveTransform(points, pointTrans, Minv);
+					tmpObsDeque.push_back(ObstacleInfo(cv::Point(pointTrans[0].x,
+						pointTrans[0].y), 50, 50));
+				}
+			}
+		}
+
 		int head = 0, tail = 0;
 		if (tmpObsDeque.size() > 5)
 		{

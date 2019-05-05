@@ -39,6 +39,7 @@ void videoDetection(int queueSize, VideoFrom vf, std::string filepath)
 			break;
 		}
 		std::cout << num << std::endl;
+		num += 1;
 		imgLine = img.clone();
 		imgObstacle = img.clone();
 
@@ -282,7 +283,7 @@ void videoDetection(int queueSize, VideoFrom vf, std::string filepath)
 		{
 			//ObstacleDetector obs;
 			std::vector<ObstacleInfo> obstacleList;
-			obs.obstacleDetection(img, lines, obstacleList);
+		 	obs.obstacleDetectionWithModel(img, lines, obstacleList);
 			if (obstacleList.size() > 0)
 			{
 				for (int i = 0; i < obstacleList.size(); ++i)
