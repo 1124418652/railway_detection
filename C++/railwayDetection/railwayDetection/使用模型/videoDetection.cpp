@@ -38,7 +38,7 @@ void videoDetection(int queueSize, VideoFrom vf, std::string filepath)
 			std::cout << "error" << std::endl;
 			break;
 		}
-		std::cout << num << std::endl;
+		std::cout << "number of frame: " << num << std::endl;
 		num += 1;
 		imgLine = img.clone();
 		imgObstacle = img.clone();
@@ -86,7 +86,7 @@ void videoDetection(int queueSize, VideoFrom vf, std::string filepath)
 								height - 1);
 		}
 
-		std::cout << roiRect << std::endl;
+		// std::cout << roiRect << std::endl;
 		/* 基于选取的 ROI 进行直线的检测 */
 		detector.sfrDetection(img, lines, height * 3 / 5, roiRect);
 		/* 根据前期检测到的直线队列，对当前检测到的直线进行微调 */
@@ -166,9 +166,6 @@ void videoDetection(int queueSize, VideoFrom vf, std::string filepath)
 			y2 = lines[0].y2;
 			if (0 == (int)lineDeque.size())      // 直线队列为空
 			{
-				std::cout << "abs(x11 - x21) > width / 4:" << abs(x11 - x21) << " " << width / 4 << std::endl;
-				std::cout << width / 2 << std::endl;
-				std::cout << abs(x12 - x22) * 1.6 << std::endl;
 				if (abs(x11 - x21) > width / 4 && abs(x11 - x21) < width / 2 && 
 					abs(x11 - x21) > abs(x12 - x22) * 1.6 && (x11 - x21) * (x12 - x22) > 0)
 					lineDeque.push_back(lines);
@@ -179,12 +176,18 @@ void videoDetection(int queueSize, VideoFrom vf, std::string filepath)
 				}
 			}
 			else {                               // 直线队列不为空
-				std::cout << "gap: " << abs(x11 - x21) << "\t" << (meanX21 - meanX11) + 100 << std::endl;
-				//if (abs(x11 - x21) >= (meanX21 - meanX11) + 100 || abs(x11 - x21) <= (meanX21 - meanX11) - 100)
 				if (abs(x11 - x21) > width / 2 || abs(x11 - x21) < width / 4 || 
 					abs(x11 - x21) < abs(x12 - x22) * 1.6 || (x11 - x21) * (x12 - x22) <= 0)
 				{
 					lines.clear();
+					lineDeque.pop_front();
+					goto here;
+				}
+				else if (abs(meanX11 - x11) + abs(meanX12 - x12) > 200 
+					|| abs(meanX21 - x21) + abs(meanX22 - x22) > 200)
+				{
+					lines.clear();
+					lineDeque.pop_front();
 					goto here;
 				}
 				else if (abs(x11 - meanX11) < 25 && abs(x12 - meanX12) < 25)
@@ -302,6 +305,6 @@ void videoDetection(int queueSize, VideoFrom vf, std::string filepath)
 			break;
 		
 		end = clock();
-		std::cout << (double)(end - start) / CLOCKS_PER_SEC << " s" << std::endl;
+		std::cout << "time used per frame: " << (double)(end - start) / CLOCKS_PER_SEC << " s" << std::endl;
 	}
 }

@@ -158,8 +158,10 @@ int callPythonFunc(const std::vector<cv::Mat> &obsTmpList, PyObject *pFunc,
 		int tmp;
 		pListItem = PyList_GetItem(pReturn, j);
 		PyArg_Parse(pListItem, "i", &tmp);
+		std::cout << tmp << "\t";
 		predictRes.push_back(tmp);
 	}
+	std::cout << std::endl;
 	if (pListItem) { Py_DECREF(pListItem); };
 	if (pList)
 		Py_DECREF(pList);

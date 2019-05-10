@@ -87,7 +87,7 @@ public:
 		   进行进一步的筛选，参数与上一个函数相同
 	*/
 	int obstacleDetectionWithModel(const cv::Mat &img, const std::vector<LinePoints> &lines,
-		std::vector<ObstacleInfo> &obstacleList, int maxThresh = 10, int minThresh = 1.0,
+		std::vector<ObstacleInfo> &obstacleList, int maxThresh = 20, int minThresh = 1.0,
 		int minGap = 25, int binaryThresh = 100);
 
 private:

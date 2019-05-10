@@ -180,6 +180,14 @@ void videoDetection(int queueSize, VideoFrom vf, std::string filepath)
 					abs(x11 - x21) < abs(x12 - x22) * 1.6 || (x11 - x21) * (x12 - x22) <= 0)
 				{
 					lines.clear();
+					lineDeque.pop_front();
+					goto here;
+				}
+				else if (abs(meanX11 - x11) + abs(meanX12 - x12) > 200 
+					|| abs(meanX21 - x21) + abs(meanX22 - x22) > 200)
+				{
+					lines.clear();
+					lineDeque.pop_front();
 					goto here;
 				}
 				else if (abs(x11 - meanX11) < 25 && abs(x12 - meanX12) < 25)

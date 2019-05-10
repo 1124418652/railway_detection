@@ -16,7 +16,7 @@ bool loadPyModule(PyObject **module, PyObject **pDict, PyObject **pFunc)
 		PyRun_SimpleString("import sys");
 		PyRun_SimpleString("sys.path.append('./')");
 
-		*module = PyImport_ImportModule("model_test");      // 用于测试模型的 Python 文件
+		*module = PyImport_ImportModule("logistic_regression");      // 用于测试模型的 Python 文件
 		if (!*module)             // 如果不能正确导入该模块
 		{
 			std::cout << "Can't open module!" << std::endl;
@@ -41,6 +41,7 @@ bool loadPyModule(PyObject **module, PyObject **pDict, PyObject **pFunc)
 		gstate = PyGILState_Ensure();
 		PyObject_CallObject(load, NULL);
 		PyGILState_Release(gstate);
+		std::cout << "load model..." << std::endl;
 		return true;
 	}
 	catch (std::exception& e)
@@ -158,8 +159,10 @@ int callPythonFunc(const std::vector<cv::Mat> &obsTmpList, PyObject *pFunc,
 		int tmp;
 		pListItem = PyList_GetItem(pReturn, j);
 		PyArg_Parse(pListItem, "i", &tmp);
+		std::cout << tmp << "\t";
 		predictRes.push_back(tmp);
 	}
+	std::cout << std::endl;
 	if (pListItem) { Py_DECREF(pListItem); };
 	if (pList)
 		Py_DECREF(pList);

@@ -39,12 +39,12 @@ int ObstacleDetector::obstacleDetection(const cv::Mat &img,
 {
 	/*
 	以下内容是为了提取数据新加的，后续需要删除
-
+	*/
 
 	std::string filePath = "img/data_set/";
-	int num = 1007;
+	int num = 1200;
 
-
+	/*
 	到这为止
 	*/
 
@@ -140,7 +140,7 @@ int ObstacleDetector::obstacleDetection(const cv::Mat &img,
 
 		/* 进行障碍物搜索和定位的算法 */
 		std::deque<ObstacleInfo> tmpObsDeque;
-		for (int i = 0; i < gradyImg1.rows - 50; ++i)
+		for (int i = 50; i < gradyImg1.rows - 50; ++i)
 		{
 			if (yHist1[i] != 0)
 			{
@@ -148,7 +148,7 @@ int ObstacleDetector::obstacleDetection(const cv::Mat &img,
 				int sumGrad = 0;
 				for (int j = i; j < i + 50; ++j)
 					sumGrad += 1;
-				if (sumGrad > leftROIWidth)
+				if (sumGrad > leftROIWidth / 2)
 				{
 					numObstacles += 1;       // 障碍物的数目加1
 					int xWraped = warpedLine1x1 - leftROIWidth / 2;
@@ -156,14 +156,14 @@ int ObstacleDetector::obstacleDetection(const cv::Mat &img,
 
 					/*
 					以下内容是为了提取数据新加的，后续需要删除
-
+					*/
 	
 					cv::imwrite(filePath + std::to_string(num) + ".jpg", 
 						warpedImg(cv::Range(i - 50, i + 50), 
 								  cv::Range(xWraped - 50, xWraped + 50)));
 					num += 1;
 					std::cout << num << std::endl;
-
+					/*
 					到这为止
 					*/
 
@@ -171,13 +171,13 @@ int ObstacleDetector::obstacleDetection(const cv::Mat &img,
 					cv::perspectiveTransform(points, pointTrans, Minv);
 					tmpObsDeque.push_back(ObstacleInfo(cv::Point(pointTrans[0].x,             // 候选障碍物框入队
 														pointTrans[0].y), 50, 50));
-					i += 150;
+					i += 50;
 				}
 			}
 		}
 	
 		int head = 0, tail = 0;
-		if (tmpObsDeque.size() > 5)
+		if (tmpObsDeque.size() > 8)
 		{
 			for (size_t i = 0; i < tmpObsDeque.size() - 1; ++i)
 			{
@@ -220,7 +220,7 @@ int ObstacleDetector::obstacleDetection(const cv::Mat &img,
 
 		/* 进行障碍物搜索和定位的算法 */
 		std::deque<ObstacleInfo> tmpObsDeque;
-		for (int i = 0; i < gradyImg2.rows - 50; ++i)
+		for (int i = 50; i < gradyImg2.rows - 50; ++i)
 		{
 			if (yHist2[i] != 0)
 			{
@@ -228,7 +228,7 @@ int ObstacleDetector::obstacleDetection(const cv::Mat &img,
 				int sumGrad = 0;
 				for (int j = i; j < i + 50; ++j)
 					sumGrad += 1;
-				if (sumGrad > leftROIWidth)
+				if (sumGrad > leftROIWidth / 2)
 				{
 					numObstacles += 1;       // 障碍物的数目加1
 					int xWraped = warpedLine1x1 + leftROIWidth / 2;
@@ -236,13 +236,15 @@ int ObstacleDetector::obstacleDetection(const cv::Mat &img,
 
 					/*
 					以下内容是为了提取数据新加的，后续需要删除
-
+					*/
 
 					cv::imwrite(filePath + std::to_string(num) + ".jpg",
 						warpedImg(cv::Range(i - 50, i + 50),
 							cv::Range(xWraped - 50, xWraped + 50)));
 					num += 1;
 					std::cout << num << std::endl;		
+
+					/*
 					到这为止
 					*/
 
@@ -250,12 +252,12 @@ int ObstacleDetector::obstacleDetection(const cv::Mat &img,
 					cv::perspectiveTransform(points, pointTrans, Minv);
 					tmpObsDeque.push_back(ObstacleInfo(cv::Point(pointTrans[0].x,
 						pointTrans[0].y), 50, 50));
-					i += 150;
+					i += 50;
 				}
 			}
 		}
 		int head = 0, tail = 0;
-		if (tmpObsDeque.size() > 5)
+		if (tmpObsDeque.size() > 8)
 		{
 			for (size_t i = 0; i < tmpObsDeque.size() - 1; ++i)
 			{
@@ -298,7 +300,7 @@ int ObstacleDetector::obstacleDetection(const cv::Mat &img,
 
 		/* 进行障碍物搜索和定位的算法 */
 		std::deque<ObstacleInfo> tmpObsDeque;
-		for (int i = 0; i < gradyImg3.rows - 50; ++i)
+		for (int i = 50; i < gradyImg3.rows - 50; ++i)
 		{
 			if (yHist3[i] != 0)
 			{
@@ -306,14 +308,14 @@ int ObstacleDetector::obstacleDetection(const cv::Mat &img,
 				int sumGrad = 0;
 				for (int j = i; j < i + 50; ++j)
 					sumGrad += 1;
-				if (sumGrad > rightROIWidth)
+				if (sumGrad > rightROIWidth / 2)
 				{
 					int xWraped = warpedLine2x1 - rightROIWidth / 2;
 					int yWraped = i;
 
 					/*
 					以下内容是为了提取数据新加的，后续需要删除
-	
+	*/
 
 					cv::imwrite(filePath + std::to_string(num) + ".jpg",
 						warpedImg(cv::Range(i - 50, i + 50),
@@ -321,6 +323,7 @@ int ObstacleDetector::obstacleDetection(const cv::Mat &img,
 					num += 1;
 					std::cout << num << std::endl;
 
+					/*
 					到这为止
 					*/
 
@@ -328,7 +331,7 @@ int ObstacleDetector::obstacleDetection(const cv::Mat &img,
 					cv::perspectiveTransform(points, pointTrans, Minv);
 					tmpObsDeque.push_back(ObstacleInfo(cv::Point(pointTrans[0].x,
 						pointTrans[0].y), 50, 50));
-					i += 150;
+					i += 50;
 				}
 			}
 		}
@@ -376,7 +379,7 @@ int ObstacleDetector::obstacleDetection(const cv::Mat &img,
 		
 		/* 进行障碍物识别的代码 */
 		std::deque<ObstacleInfo> tmpObsDeque;
-		for (int i = 0; i < gradyImg4.rows - 50; ++i)
+		for (int i = 50; i < gradyImg4.rows - 50; ++i)
 		{
 			if (yHist4[i] != 0)
 			{
@@ -384,14 +387,14 @@ int ObstacleDetector::obstacleDetection(const cv::Mat &img,
 				int sumGrad = 0;
 				for (int j = i; j < i + 50; ++j)
 					sumGrad += 1;
-				if (sumGrad > rightROIWidth)
+				if (sumGrad > rightROIWidth / 2)
 				{
 					int xWraped = warpedLine2x1 + rightROIWidth / 2;
 					int yWraped = i;
 
 					/*
 					以下内容是为了提取数据新加的，后续需要删除
-		
+		*/
 
 					cv::imwrite(filePath + std::to_string(num) + ".jpg",
 						warpedImg(cv::Range(i - 50, i + 50),
@@ -399,13 +402,14 @@ int ObstacleDetector::obstacleDetection(const cv::Mat &img,
 					num += 1;
 					std::cout << num << std::endl;
 
+					/*
 					到这为止
 					*/
 					std::vector<cv::Point2f> points = { cv::Point2f(xWraped, yWraped) }, pointTrans;
 					cv::perspectiveTransform(points, pointTrans, Minv);
 					tmpObsDeque.push_back(ObstacleInfo(cv::Point(pointTrans[0].x,
 						pointTrans[0].y), 50, 50));
-					i += 150;		
+					i += 50;		
 				}
 			}
 		}
@@ -526,7 +530,7 @@ int ObstacleDetector::obstacleDetectionWithModel(const cv::Mat &img,
 	/* 对 ROI 区域1进行障碍物检测 */
 	if (meanGradyImg1[0] < maxThresh && meanGradyImg1[0] > minThresh)
 	{
-		cv::Mat kernal = cv::Mat::ones(1, leftROIWidth / 6, CV_8UC1);      // 定义腐蚀变换的核
+		cv::Mat kernal = cv::Mat::ones(1, leftROIWidth / 5, CV_8UC1);      // 定义腐蚀变换的核
 		cv::threshold(gradyImg1, gradyImg1, binaryThresh, 255, cv::THRESH_BINARY);
 		cv::erode(gradyImg1, gradyImg1, kernal);                           // 对梯度的阈值图进行腐蚀运算
 		for (int row = 0; row < gradyImg1.rows; ++row)
@@ -579,30 +583,35 @@ int ObstacleDetector::obstacleDetectionWithModel(const cv::Mat &img,
 				{
 					xWraped = xyWraped[i][0];
 					yWraped = xyWraped[i][1];
-					std::vector<cv::Point2f> points = { cv::Point2f(xWraped, yWraped) }, pointTrans;
+					//std::vector<cv::Point2f> points = { cv::Point2f(xWraped, yWraped) }, pointTrans;
+					/*
 					cv::perspectiveTransform(points, pointTrans, Minv);
 					tmpObsDeque.push_back(ObstacleInfo(cv::Point(pointTrans[0].x,
 						pointTrans[0].y), 50, 50));
+					*/
+					tmpObsDeque.push_back(ObstacleInfo(cv::Point(xWraped, yWraped), 50, 50));
 				}
 			}
 		}
 
-		int head = 0, tail = 0;
+		int head = 1, tail = 1;
 		if (tmpObsDeque.size() > 5)
 		{
 			for (size_t i = 0; i < tmpObsDeque.size() - 1; ++i)
 			{
 				if (tmpObsDeque[i + 1].center.y - tmpObsDeque[i].center.y > minGap)
 				{
-					if (head == tail) {
+					while (head < tail) {
 						head++;
-						tail++;
 					}
-					else {
-						while (head < tail)
-							head++;
-					}
-					obstacleList.push_back(tmpObsDeque[head]);
+					std::vector<cv::Point2f> points = { cv::Point2f(tmpObsDeque[head].center.x,
+						tmpObsDeque[head].center.y) };
+					std::vector<cv::Point2f> pointTrans;
+					cv::perspectiveTransform(points, pointTrans, Minv);
+					obstacleList.push_back(ObstacleInfo(cv::Point(pointTrans[0].x,
+						pointTrans[0].y), 50, 50));
+					head++;
+					tail++;
 				}
 				else
 					tail++;
@@ -611,13 +620,21 @@ int ObstacleDetector::obstacleDetectionWithModel(const cv::Mat &img,
 		else
 		{
 			for (size_t i = 0; i < tmpObsDeque.size(); ++i)
-				obstacleList.push_back(tmpObsDeque[i]);
+			{
+				std::vector<cv::Point2f> points = { cv::Point2f(tmpObsDeque[i].center.x,
+					tmpObsDeque[i].center.y) };
+				std::vector<cv::Point2f> pointTrans;
+				cv::perspectiveTransform(points, pointTrans, Minv);
+				obstacleList.push_back(ObstacleInfo(cv::Point(pointTrans[0].x,
+					pointTrans[0].y), 50, 50));
+			}
+				//obstacleList.push_back(tmpObsDeque[i]);
 		}
 	}
 
 	if (meanGradyImg2[0] < maxThresh && meanGradyImg2[0] > minThresh)
 	{
-		cv::Mat kernal = cv::Mat::ones(1, leftROIWidth / 6, CV_8UC1);
+		cv::Mat kernal = cv::Mat::ones(1, leftROIWidth / 5, CV_8UC1);
 		cv::threshold(gradyImg2, gradyImg2, binaryThresh, 255, cv::THRESH_BINARY);
 		cv::erode(gradyImg2, gradyImg2, kernal);
 		for (int row = 0; row < gradyImg2.rows; ++row)
@@ -670,30 +687,35 @@ int ObstacleDetector::obstacleDetectionWithModel(const cv::Mat &img,
 				{
 					xWraped = xyWraped[i][0];
 					yWraped = xyWraped[i][1];
+					/*
 					std::vector<cv::Point2f> points = { cv::Point2f(xWraped, yWraped) }, pointTrans;
 					cv::perspectiveTransform(points, pointTrans, Minv);
 					tmpObsDeque.push_back(ObstacleInfo(cv::Point(pointTrans[0].x,
 						pointTrans[0].y), 50, 50));
+						*/
+					tmpObsDeque.push_back(ObstacleInfo(cv::Point(xWraped, yWraped), 50, 50));
 				}
 			}
 		}
 
-		int head = 0, tail = 0;
+		int head = 1, tail = 1;
 		if (tmpObsDeque.size() > 5)
 		{
 			for (size_t i = 0; i < tmpObsDeque.size() - 1; ++i)
 			{
 				if (tmpObsDeque[i + 1].center.y - tmpObsDeque[i].center.y > minGap)
 				{
-					if (head == tail) {
+					while (head < tail) {
 						head++;
-						tail++;
 					}
-					else {
-						while (head < tail)
-							head++;
-					}
-					obstacleList.push_back(tmpObsDeque[head]);
+					std::vector<cv::Point2f> points = { cv::Point2f(tmpObsDeque[head].center.x,
+						tmpObsDeque[head].center.y) };
+					std::vector<cv::Point2f> pointTrans;
+					cv::perspectiveTransform(points, pointTrans, Minv);
+					obstacleList.push_back(ObstacleInfo(cv::Point(pointTrans[0].x,
+						pointTrans[0].y), 50, 50));
+					head++;
+					tail++;
 				}
 				else
 					tail++;
@@ -701,14 +723,20 @@ int ObstacleDetector::obstacleDetectionWithModel(const cv::Mat &img,
 		}
 		else
 		{
-			for (size_t i = 0; i < tmpObsDeque.size(); ++i)
-				obstacleList.push_back(tmpObsDeque[i]);
+			for (size_t i = 0; i < tmpObsDeque.size(); ++i) {
+				std::vector<cv::Point2f> points = { cv::Point2f(tmpObsDeque[i].center.x,
+					tmpObsDeque[i].center.y) };
+				std::vector<cv::Point2f> pointTrans;
+				cv::perspectiveTransform(points, pointTrans, Minv);
+				obstacleList.push_back(ObstacleInfo(cv::Point(pointTrans[0].x,
+					pointTrans[0].y), 50, 50));
+			}
 		}
 	}
 
 	if (meanGradyImg3[0] < maxThresh && meanGradyImg3[0] > minThresh)
 	{
-		cv::Mat kernal = cv::Mat::ones(1, rightROIWidth / 6, CV_8UC1);
+		cv::Mat kernal = cv::Mat::ones(1, rightROIWidth / 5, CV_8UC1);
 		cv::threshold(gradyImg3, gradyImg3, binaryThresh, 255, cv::THRESH_BINARY);
 		cv::erode(gradyImg3, gradyImg3, kernal);
 		for (int row = 0; row < gradyImg3.rows; ++row)
@@ -760,30 +788,35 @@ int ObstacleDetector::obstacleDetectionWithModel(const cv::Mat &img,
 				{
 					xWraped = xyWraped[i][0];
 					yWraped = xyWraped[i][1];
+					/*
 					std::vector<cv::Point2f> points = { cv::Point2f(xWraped, yWraped) }, pointTrans;
 					cv::perspectiveTransform(points, pointTrans, Minv);
 					tmpObsDeque.push_back(ObstacleInfo(cv::Point(pointTrans[0].x,
 						pointTrans[0].y), 50, 50));
+						*/
+					tmpObsDeque.push_back(ObstacleInfo(cv::Point(xWraped, yWraped), 50, 50));
 				}
 			}
 		}
 
-		int head = 0, tail = 0;
+		int head = 1, tail = 1;
 		if (tmpObsDeque.size() > 5)
 		{
 			for (size_t i = 0; i < tmpObsDeque.size() - 1; ++i)
 			{
 				if (tmpObsDeque[i + 1].center.y - tmpObsDeque[i].center.y > minGap)
 				{
-					if (head == tail) {
+					while (head < tail) {
 						head++;
-						tail++;
 					}
-					else {
-						while (head < tail)
-							head++;
-					}
-					obstacleList.push_back(tmpObsDeque[head]);
+					std::vector<cv::Point2f> points = { cv::Point2f(tmpObsDeque[head].center.x,
+						tmpObsDeque[head].center.y) };
+					std::vector<cv::Point2f> pointTrans;
+					cv::perspectiveTransform(points, pointTrans, Minv);
+					obstacleList.push_back(ObstacleInfo(cv::Point(pointTrans[0].x,
+						pointTrans[0].y), 50, 50));
+					head++;
+					tail++;
 				}
 				else
 					tail++;
@@ -791,14 +824,21 @@ int ObstacleDetector::obstacleDetectionWithModel(const cv::Mat &img,
 		}
 		else
 		{
-			for (size_t i = 0; i < tmpObsDeque.size(); ++i)
-				obstacleList.push_back(tmpObsDeque[i]);
+			for (size_t i = 0; i < tmpObsDeque.size(); ++i) {
+				std::vector<cv::Point2f> points = { cv::Point2f(tmpObsDeque[i].center.x,
+					tmpObsDeque[i].center.y) };
+				std::vector<cv::Point2f> pointTrans;
+				cv::perspectiveTransform(points, pointTrans, Minv);
+				obstacleList.push_back(ObstacleInfo(cv::Point(pointTrans[0].x,
+					pointTrans[0].y), 50, 50));
+			}
 		}
+
 	}
 
 	if (meanGradyImg4[0] < maxThresh && meanGradyImg4[0] > minThresh)
 	{
-		cv::Mat kernal = cv::Mat::ones(1, rightROIWidth / 6, CV_8UC1);
+		cv::Mat kernal = cv::Mat::ones(1, rightROIWidth / 5, CV_8UC1);
 		cv::threshold(gradyImg4, gradyImg4, binaryThresh, 255, cv::THRESH_BINARY);
 		cv::erode(gradyImg4, gradyImg4, kernal);
 		for (int row = 0; row < gradyImg4.rows; ++row)
@@ -850,30 +890,35 @@ int ObstacleDetector::obstacleDetectionWithModel(const cv::Mat &img,
 				{
 					xWraped = xyWraped[i][0];
 					yWraped = xyWraped[i][1];
+					/*
 					std::vector<cv::Point2f> points = { cv::Point2f(xWraped, yWraped) }, pointTrans;
 					cv::perspectiveTransform(points, pointTrans, Minv);
 					tmpObsDeque.push_back(ObstacleInfo(cv::Point(pointTrans[0].x,
 						pointTrans[0].y), 50, 50));
+						*/
+					tmpObsDeque.push_back(ObstacleInfo(cv::Point(xWraped, yWraped), 50, 50));
 				}
 			}
 		}
 
-		int head = 0, tail = 0;
+		int head = 1, tail = 1;
 		if (tmpObsDeque.size() > 5)
 		{
 			for (size_t i = 0; i < tmpObsDeque.size() - 1; ++i)
 			{
 				if (tmpObsDeque[i + 1].center.y - tmpObsDeque[i].center.y > minGap)
 				{
-					if (head == tail) {
+					while (head < tail) {
 						head++;
-						tail++;
 					}
-					else {
-						while (head < tail)
-							head++;
-					}
-					obstacleList.push_back(tmpObsDeque[head]);
+					std::vector<cv::Point2f> points = { cv::Point2f(tmpObsDeque[head].center.x,
+						tmpObsDeque[head].center.y) };
+					std::vector<cv::Point2f> pointTrans;
+					cv::perspectiveTransform(points, pointTrans, Minv);
+					obstacleList.push_back(ObstacleInfo(cv::Point(pointTrans[0].x,
+						pointTrans[0].y), 50, 50));
+					head++;
+					tail++;
 				}
 				else
 					tail++;
@@ -881,9 +926,16 @@ int ObstacleDetector::obstacleDetectionWithModel(const cv::Mat &img,
 		}
 		else
 		{
-			for (size_t i = 0; i < tmpObsDeque.size(); ++i)
-				obstacleList.push_back(tmpObsDeque[i]);
+			for (size_t i = 0; i < tmpObsDeque.size(); ++i) {
+				std::vector<cv::Point2f> points = { cv::Point2f(tmpObsDeque[i].center.x,
+					tmpObsDeque[i].center.y) };
+				std::vector<cv::Point2f> pointTrans;
+				cv::perspectiveTransform(points, pointTrans, Minv);
+				obstacleList.push_back(ObstacleInfo(cv::Point(pointTrans[0].x,
+					pointTrans[0].y), 50, 50));
+			}
 		}
+
 	}
 
 	delete[]yHist1;
