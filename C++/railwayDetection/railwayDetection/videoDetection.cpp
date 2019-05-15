@@ -6,6 +6,7 @@ void videoDetection(int queueSize, VideoFrom vf, std::string filepath)
 {
 	int queCount = 0;
 	int num = 0;
+	bool initRoi = true;
 	clock_t start, end;
 
 	cv::VideoCapture cap;
@@ -20,7 +21,8 @@ void videoDetection(int queueSize, VideoFrom vf, std::string filepath)
 		return;
 	}
 
-	std::deque<std::vector<LinePoints>> lineDeque;   // 用于保存视频帧中正确检测的直线的队列
+	std::deque<std::vector<LinePoints>> lineDeque;      // 用于保存视频帧中正确检测的直线的队列
+	std::deque<std::vector<LinePoints>> tmpLineDeque;   // 辅助直线队列，用于保存在直线检测失败时出队的直线
 	cv::Mat imgLine;
 	cv::Mat imgObstacle;
 	LineDetector detector;
@@ -49,21 +51,10 @@ void videoDetection(int queueSize, VideoFrom vf, std::string filepath)
 		int meanX11 = 0, meanX12 = 0;    // 用于记录直线队列中的直线的4个坐标均值
 		int meanX21 = 0, meanX22 = 0;
 		int y1 = 0, y2 = 0;
-		
-		/* 
-		指定进行图片预处理和直线检测的 Roi 区域，
-		Roi 区域是由前期检测到的直线重新确定调整的。
-		*/
-		if (lineDeque.size() == 0)       // 如果直线队列为空，表示前期没有找到合适的直线
+
+		int numLinePairs = (int)lineDeque.size();
+		if (numLinePairs > 0)
 		{
-			roiRect = cv::Vec4i(width / 6,                  // 图片中用于做检测的 ROI 区域定义
-				height * 2 / 3,
-				width - width / 6 - 2,
-				height - 1);
-		}
-		 
-		else {                           // 如果直线队列不为空，说明前期已经找到了合适的直线
-			int numLinePairs = (int)lineDeque.size();
 			for (int i = 0; i < numLinePairs; ++i)
 			{
 				meanX11 += lineDeque[i][0].x1;
@@ -75,11 +66,23 @@ void videoDetection(int queueSize, VideoFrom vf, std::string filepath)
 			meanX12 /= numLinePairs;
 			meanX21 /= numLinePairs;
 			meanX22 /= numLinePairs;
-
+		}
+		/* 
+		指定进行图片预处理和直线检测的 Roi 区域，
+		Roi 区域是由前期检测到的直线重新确定调整的。
+		*/
+		if (lineDeque.size() == 0 || initRoi)       // 如果直线队列为空，表示前期没有找到合适的直线
+		{
+			roiRect = cv::Vec4i(width / 6,                  // 图片中用于做检测的 ROI 区域定义
+				height * 2 / 3,
+				width - width / 6 - 2,
+				height - 1);
+		}
+		 
+		else {                           // 如果直线队列不为空，说明前期已经找到了合适的直线
+			// 基于前期检测到的直线来调整当前的 ROI 大小
 			int minv = std::min({ meanX11, meanX12, meanX21, meanX22 });
 			int maxv = std::max({ meanX11, meanX12, meanX21, meanX22 });
-
-			// 基于前期检测到的直线来调整当前的 ROI 大小
 			roiRect = cv::Vec4i(std::max(0, minv - 100), 
 								height * 2 / 3, 
 								std::min(maxv + 100, width - 2), 
@@ -88,13 +91,14 @@ void videoDetection(int queueSize, VideoFrom vf, std::string filepath)
 
 		// std::cout << roiRect << std::endl;
 		/* 基于选取的 ROI 进行直线的检测 */
-		detector.sfrDetection(img, lines, height * 3 / 5, roiRect);
+ 		detector.sfrDetection(img, lines, height * 3 / 5, roiRect);
 		/* 根据前期检测到的直线队列，对当前检测到的直线进行微调 */
 		int linesSize = (int)lines.size();
 		std::cout << "number of lines： " << lines.size() << std::endl;
+		std::cout << "size of lineDeque: " << lineDeque.size() << std::endl;
 		if (0 == linesSize)         // 当前帧没有检测到直线
 		{
-			if (0 == (int)lineDeque.size())     // 直线队列为空
+			if (0 == (int)lineDeque.size() && 0 == (int)tmpLineDeque.size())     // 直线队列为空
 				continue;
 			else {                              // 直线队列不为空
 				y1 = lineDeque.back()[0].y1;
@@ -102,10 +106,11 @@ void videoDetection(int queueSize, VideoFrom vf, std::string filepath)
 				lines.push_back(LinePoints(meanX11, y1, meanX12, y2));
 				lines.push_back(LinePoints(meanX21, y1, meanX22, y2));
 				queCount += 1;
-				if (queCount == 5)
+				if (queCount == 50)  // 连续50帧检测不到直线
 				{
 					lineDeque.pop_front();
 					queCount = 0;
+					initRoi = true;
 				}
 			}
 		}
@@ -120,7 +125,9 @@ void videoDetection(int queueSize, VideoFrom vf, std::string filepath)
 				int x2 = lines[0].x2;
 				y1 = lines[0].y1;
 				y2 = lines[0].y2;
-				if (abs(x1 - meanX11) < 25 && abs(x2 - meanX12) < 25)
+
+				// 检测到的直线与队列中直线1的均值接近
+				if (abs(x1 - meanX11) + abs(x2 - meanX12) < 25)
 				{
 					lines.clear();
 					lines.push_back(LinePoints((meanX11 + x1) / 2, y1, (meanX12 + x2) / 2, y2));
@@ -134,7 +141,9 @@ void videoDetection(int queueSize, VideoFrom vf, std::string filepath)
 						lineDeque.push_back(lines);
 					}
 				}
-				else if (abs(x1 - meanX21) < 25 && abs(x2 - meanX22) < 25)
+
+				// 检测到的直线与队列中直线2的均值接近
+				else if (abs(x1 - meanX21) + abs(x2 - meanX22) < 25)
 				{
 					lines.clear();
 					lines.push_back(LinePoints((meanX21 + x1) / 2, y1, (meanX22 + x2) / 2, y2));
@@ -148,6 +157,8 @@ void videoDetection(int queueSize, VideoFrom vf, std::string filepath)
 						lineDeque.push_back(lines);
 					}
 				}
+
+				// 检测到的直线与队列中的两条直线均值都不接近，沿用上一帧检测结果
 				else
 				{
 					lines.clear();
@@ -166,9 +177,13 @@ void videoDetection(int queueSize, VideoFrom vf, std::string filepath)
 			y2 = lines[0].y2;
 			if (0 == (int)lineDeque.size())      // 直线队列为空
 			{
-				if (abs(x11 - x21) > width / 4 && abs(x11 - x21) < width / 2 && 
+				initRoi = true;    // 需要使用初始化的ROI进行下一帧的检测
+				// 检测到的两条直线符合铁轨线的特征
+				if (abs(x11 - x21) > width / 4 && abs(x11 - x21) < width / 2 &&
 					abs(x11 - x21) > abs(x12 - x22) * 1.6 && (x11 - x21) * (x12 - x22) > 0)
+				{
 					lineDeque.push_back(lines);
+				}
 				else
 				{
 					lines.clear();
@@ -176,25 +191,30 @@ void videoDetection(int queueSize, VideoFrom vf, std::string filepath)
 				}
 			}
 			else {                               // 直线队列不为空
+				// 检测出的直线不合理
 				if (abs(x11 - x21) > width / 2 || abs(x11 - x21) < width / 4 || 
 					abs(x11 - x21) < abs(x12 - x22) * 1.6 || (x11 - x21) * (x12 - x22) <= 0)
 				{
 					lines.clear();
-					lineDeque.pop_front();
-					goto here;
+					lines = lineDeque.back();
+					// lineDeque.pop_front();
+					initRoi = true;
+					// goto here;
 				}
+				// 检测得到的直线与队列中的不同，使用队列中的结构
 				else if (abs(meanX11 - x11) + abs(meanX12 - x12) > 200 
 					|| abs(meanX21 - x21) + abs(meanX22 - x22) > 200)
 				{
 					lines.clear();
-					lineDeque.pop_front();
-					goto here;
+					lines = lineDeque.back();
+					// lineDeque.pop_front();
+					initRoi = true;
 				}
-				else if (abs(x11 - meanX11) < 25 && abs(x12 - meanX12) < 25)
+				else if (abs(x11 - meanX11) < 5 && abs(x12 - meanX12) < 5)
 				{
 					lines.clear();
 					lines.push_back(LinePoints((x11 + meanX11) / 2, y1, (x12 + meanX12) / 2, y2));
-					if (abs(x21 - meanX21) < 25 && abs(x22 - meanX22) < 25)
+					if (abs(x21 - meanX21) < 5 && abs(x22 - meanX22) < 5)
 						lines.push_back(LinePoints((x21 + meanX21) / 2, y1, (x22 + meanX22) / 2, y2));
 					else
 						lines.push_back(LinePoints(meanX21, y1, meanX22, y2));
@@ -213,7 +233,9 @@ void videoDetection(int queueSize, VideoFrom vf, std::string filepath)
 					//lines.clear();
 					//lines.push_back(LinePoints(meanX11, y1, meanX12, y2));
 					//lines.push_back(LinePoints(meanX21, y1, meanX22, y2));
-					lineDeque.clear();
+					//lineDeque.clear();
+					lines = lineDeque.back();
+					//lineDeque.pop_front();
 				}
 				if ((int)lineDeque.size() < 5)
 					lineDeque.push_back(lines);
@@ -233,12 +255,22 @@ void videoDetection(int queueSize, VideoFrom vf, std::string filepath)
 				LinePoints tmpLine1, tmpLine2;
 				for (size_t i = 0; i < lines.size(); ++i)
 				{
-					if (lines[i].x1 - meanX11 < 5 && lines[i].x1 - meanX11 < tmpLine1.x1 - meanX11) {
+					if (abs(lines[i].x1 - meanX11) < 5 
+						&& abs(lines[i].x1 - meanX11) < abs(tmpLine1.x1 - meanX11)) {
 						tmpLine1 = lines[i];
 					}
-					if (lines[i].x1 - meanX21 < 5 && lines[i].x1 - meanX21 < tmpLine2.x1 - meanX21) {
+					if (abs(lines[i].x1 - meanX21) < 5 
+						&& abs(lines[i].x1 - meanX21) < abs(tmpLine2.x1 - meanX21)) {
 						tmpLine2 = lines[i];
 					}
+				}
+				if (tmpLine1.x1 == 0)          // 如果没有取到合适的tmpLine1
+				{
+					tmpLine1 = lineDeque.back()[0];
+				}
+				if (tmpLine2.x1 == 0)          // 如果没有取到合适的tmpLine2
+				{
+					tmpLine2 = lineDeque.back()[1];
 				}
 				lines.clear();
 				// 完成lines中的直线的微调，并且去除多余的线
@@ -262,7 +294,7 @@ void videoDetection(int queueSize, VideoFrom vf, std::string filepath)
 					else {
 						lines.push_back(LinePoints(meanX21, y1, meanX22, y2));
 					}
-					lineDeque.pop_front();
+					//lineDeque.pop_front();
 				}
 				// 将当前帧的直线加入直线队列中
 				if (lineDeque.size() < 5)

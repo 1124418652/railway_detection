@@ -30,13 +30,30 @@ def test_model():
 		print(acc)
 
 
-with tf.Graph().as_default() as g:
-	output_graph_def = tf.GraphDef()
-	pb_file_path = 'models/constant_model.pb'
-	with open(pb_file_path, 'rb') as f:
-		output_graph_def.ParseFromString(f.read())
-		# 将计算图从 output_graph_def 中导入到当前的默认图中
-		tf.import_graph_def(output_graph_def, name='')   
+# with tf.Graph().as_default() as g:
+# 	output_graph_def = tf.GraphDef()
+# 	pb_file_path = 'models/constant_model.pb'
+# 	with open(pb_file_path, 'rb') as f:
+# 		output_graph_def.ParseFromString(f.read())
+# 		# 将计算图从 output_graph_def 中导入到当前的默认图中
+# 		tf.import_graph_def(output_graph_def, name='')   
+
+# 		"""
+# 		提取参数的内容
+# 		"""
+# 	with tf.Session(graph = g) as sess:
+# 		W_conv1 = sess.graph.get_tensor_by_name('W1:0')
+# 		b_conv1 = sess.graph.get_tensor_by_name('b1:0')
+# 		W_conv2 = sess.graph.get_tensor_by_name('W2:0')
+# 		b_conv2 = sess.graph.get_tensor_by_name('b2:0')
+# 		W_fc1 = sess.graph.get_tensor_by_name('Wfc1:0')
+# 		b_fc1 = sess.graph.get_tensor_by_name('bfc1:0')
+# 		W_fc3 = sess.graph.get_tensor_by_name('Wfc3:0')
+# 		b_fc3 = sess.graph.get_tensor_by_name('bfc3:0')
+
+# 		W1, b1, W2, b2, W3, b3, W4, b4 = sess.run([W_conv1, b_conv1,
+# 			W_conv2, b_conv2, W_fc1, b_fc1, W_fc3, b_fc3])
+
 
 def predict(img, width, height, channel):
 	"""
@@ -66,3 +83,9 @@ def predict(img, width, height, channel):
 
 		pre = sess.run(prediction, feed_dict = {input_x: [img], keep_prob:1})
 		return pre.ravel()[0]
+
+if __name__ == '__main__':
+	with h5py.File('train/train.h5') as fr:
+		data = (np.array(list(fr['data'])) / 255)[0:100]
+		label = np.array(list(fr['label'])).reshape((-1, 1))[0:100]
+	print(predict(data))

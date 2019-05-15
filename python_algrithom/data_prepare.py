@@ -13,40 +13,46 @@ import numpy as np
 
 def image_crop(img, x, y, width, height):
 
-	img_height, img_width = img.shape[:2]
+    img_height, img_width = img.shape[:2]
 
-	if not isinstance(img, np.ndarray) or y+height >= img_height or x+width >= img_width:
-		pass
+    if not isinstance(img, np.ndarray) or y+height >= img_height or x+width >= img_width:
+        pass
 
-	else:
-		return img[y: y+height, x: x+width]
+    else:
+        return img[y: y+height, x: x+width]
 
 
 def write_img():
-	dir_path1 = '../C++/railwayDetection/railwayDetection/img/data_set/positive/'
-	dir_path2 = '../C++/railwayDetection/railwayDetection/img/data_set/negtive/'
-	data1 = []
-	label1 = []
-	for filename in os.listdir(dir_path1):
-		filename = os.path.join(dir_path1, filename)
-		img = cv2.imread(filename)
-		img = cv2.resize(img, (64, 64))
-		data1.append(img)
-		label1.append(1)
+    dir_path1 = '../C++/railwayDetection/railwayDetection/img/data_set/positive/'
+    dir_path2 = '../C++/railwayDetection/railwayDetection/img/data_set/negtive/'
+    data1 = []
+    label1 = []
+    for filename in os.listdir(dir_path1):
+        filename = os.path.join(dir_path1, filename)
+        try:
+            img = cv2.imread(filename)
+            img = cv2.resize(img, (64, 64))
+            data1.append(img)
+            label1.append(1)
+        except:
+            pass
 
-	for filename in os.listdir(dir_path2):
-		filename = os.path.join(dir_path2, filename)
-		img = cv2.imread(filename)
-		img = cv2.resize(img, (64, 64))
-		data1.append(img)
-		label1.append(0)
+    for filename in os.listdir(dir_path2):
+        filename = os.path.join(dir_path2, filename)
+        try:
+            img = cv2.imread(filename)
+            img = cv2.resize(img, (64, 64))
+            data1.append(img)
+            label1.append(0)
+        except:
+            pass
 
-	if not os.path.exists('train/'):
-		os.mkdir('train')
+    if not os.path.exists('train/'):
+        os.mkdir('train')
 
-	with h5py.File('train/train.h5') as f:
-		f['data'] = data1
-		f['label'] = label1
+    with h5py.File('train/train.h5') as f:
+        f['data'] = data1
+        f['label'] = label1
 
 
 def get_batches(X, y, batch_size, axis = 0, seed = 0):
@@ -85,4 +91,4 @@ def get_batches(X, y, batch_size, axis = 0, seed = 0):
         return mini_batches
 
 
-# write_img()
+write_img()

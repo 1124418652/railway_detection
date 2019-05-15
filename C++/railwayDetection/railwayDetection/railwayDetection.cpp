@@ -7,6 +7,7 @@
 #include "lineDetection.h"
 #include "obstacleDetection.h"
 #include "videoDetection.h"
+#include "sfrDetection.h"
 #include "loadTensorflowModel.h"
 
 using namespace std;
@@ -72,8 +73,8 @@ int main()
 	*/
 
 	
-	videoDetection(5, FROM_FILE, "img/轨道有异物1extract.avi");
-	
+	//videoDetection(5, FROM_FILE, "img/轨道有异物2extract1.avi");
+	videoTest("img/3extract1.avi");
 	/*
 	PyObject *module = NULL;
 	PyObject *pDict = NULL;

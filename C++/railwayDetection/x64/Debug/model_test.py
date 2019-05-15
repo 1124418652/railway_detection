@@ -44,9 +44,7 @@ def predict(img, width, height, channel):
 	for tmp in img:
 		modify_img.append(cv2.resize(tmp, (64, 64)) / 255.0)
 	modify_img = np.array(modify_img)
-	# print("resize")
-	# print("resize image")
-	# with tf.Session() as sess:
+	
 	sess.run(tf.global_variables_initializer())
 	input_x = sess.graph.get_tensor_by_name('inputx:0')
 	prediction = sess.graph.get_tensor_by_name('predict:0')
@@ -55,13 +53,9 @@ def predict(img, width, height, channel):
 	pre = sess.run(prediction, feed_dict = {input_x: modify_img, keep_prob:1})
 	return pre.ravel().tolist()
 
-# img = cv2.imread("../../railwayDetection/img/A.png")
-# print(img.shape)
-# height, width, channel = img.shape[:]
-# predict(img.reshape(-1), width, height, channel)
-
-# img = np.random.randn(10, 50, 50, 3) * 10
-# img = img.flatten()
-
-# load_model()
-# predict(img, 50, 50, 3)
+# if __name__ == '__main__':
+# 	with h5py.File('../../../../python_algrithom/train/train.h5') as fr:
+# 		data = (np.array(list(fr['data'])) / 255)[0:10]
+# 		label = np.array(list(fr['label'])).reshape((-1, 1))[0:100]
+# 	load_model()
+# 	print(predict(data, 64, 64, 3))

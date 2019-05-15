@@ -168,6 +168,6 @@ int callPythonFunc(const std::vector<cv::Mat> &obsTmpList, PyObject *pFunc,
 		Py_DECREF(pList);
 	if (pArgs)
 		Py_DECREF(pArgs);
-	if (pReturn)
-		Py_DECREF(pReturn);
+//	if (pReturn)
+	//	Py_DECREF(pReturn);
 }
